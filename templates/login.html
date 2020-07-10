@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"></script>
+    <link rel="stylesheet" href="/static/css/loginPage.css">
+    <link rel="shortcut icon" sizes="32x32" href="static/images/rosbank_icon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+<script type="text/babel">
+
+
+
+class LoginForm extends React.Component{
+
+    render (){
+
+        return(
+            <div className={this.props.className}>
+            <h3>Авторизация</h3>
+            <form name="login_form" className="mainPageForm" method="post">
+                <input type="hidden" name="type" value="login"></input><input type="hidden" name="type" value="login"></input>
+                <input type="text" placeholder="Ваш RB" name="login"
+                value={this.props.login} onChange={this.props.handleLoginInput}
+                ></input>
+                <input type="password" placeholder="Укажите пароль" name="pswrd"
+                value={this.props.password} onChange={this.props.handlePasswordInput}
+                ></input>
+                <input type="submit" value="Войти" onClick={this.props.handleLogin}></input>
+                <input type="submit" value="У меня нет пароля" onClick={this.props.onRegister}></input>
+            </form>
+            </div>
+        )
+    }
+
+};
+
+class RegisterForm extends React.Component{
+
+    render() {
+        return (
+            <div className={this.props.className}>
+            <h3>Регистрация</h3>
+            <form name="register_form" className="mainPageForm" method="post">
+                <input type="hidden" name="type" value="register"></input>
+                <input type="text" placeholder="Ваш RB" name="login"
+                       value={this.props.login} onChange={this.props.handleLoginInput}></input>
+                <input type="password" placeholder="Укажите пароль" name="pswrd"
+                       value={this.props.password} onChange={this.props.handlePasswordInput}></input>
+                <input type="password" placeholder="Повторите пароль" name="pswrd_check"
+                       value={this.props.passwordCheck} onChange={this.props.handlePasswordInput}></input>
+                <input type="submit" value="Зарегистрироваться" onClick={this.props.handleLogin}></input>
+            </form>
+            </div>
+        )
+}
+}
+
+
+class Form extends React.Component{
+    render(){
+        if (this.props.type == 'login'){
+            return <LoginForm
+                    className={this.props.className}
+                    onRegister={this.props.handleSwitchForm}
+                    handleLogin={this.props.handleLogin}
+                    handlePasswordInput={this.props.handlePasswordInput}
+                    handleLoginInput={this.props.handleLoginInput}
+                    handlePasswordCheckInput={this.props.handlePasswordCheckInput}
+                    login = {this.props.login}
+                    password = {this.props.password}
+                    passwordCheck ={this.props.passwordCheck}
+            />;
+        } else {
+            return <RegisterForm
+                className={this.props.className}
+            />;
+        }
+    }
+
+}
+
+
+
+class MainPage extends React.Component {
+    constructor(props){
+        super(props);
+
+        this.state = {
+            type: 'login',
+            login: '',
+            pswrd: '',
+            pswrdCheck: ''
+        };
+
+        this.handleLoginInput = this.handleLoginInput.bind(this);
+        this.handlePasswordInput = this.handlePasswordInput.bind(this);
+        this.handlePasswordCheckInput = this.handlePasswordCheckInput.bind(this);
+        this.handleSwitchForm = this.handleSwitchForm.bind(this);
+        this.handleLogin = this.handleLogin.bind(this);
+
+    }
+    handlePasswordInput(event){
+        this.setState({
+            pswrd: event.target.value,
+        })
+    }
+
+    handlePasswordCheckInput(event){
+        this.setState({
+            pswrdCheck: event.target.value,
+        })
+    }
+
+    handleLoginInput(event){
+        this.setState({
+            login: event.target.value,
+        })
+    }
+
+    async handleLogin(event){
+
+        alert(this.state.login + ' '+ this.state.pswrd);
+        let login = this.state.login;
+        let pswrd = this.state.pswrd;
+
+        let response = await fetch('http://127.0.0.1:5000/login', {
+            method: 'post',
+            body: JSON.stringify({
+                    login: login,
+                    password: pswrd
+                }),
+            headers: {
+                    'Content-Type': 'application/json'
+            }
+        })
+
+        if (response.ok) {
+                let json = await response.json();
+                alert('json :' + json);
+            } else {
+                console.log(response);
+            }
+
+    }
+
+
+
+    handleSwitchForm(event){
+        let existingType = this.state.type;
+
+        this.setState({
+            type: existingType == 'login' ? 'register': 'login',
+        });
+
+
+    }
+
+     /*   async handleSwitchForm(event) {
+        event.preventDefault();
+        let login = this.state.login;
+        let password = this.state.password;
+        let passwordCheck = this.state.passwordCheck;
+
+
+
+
+
+            let response = await fetch('http://127.0.0.1:5000/register', {
+                method: 'post',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    login: login,
+                    password: password,
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                let json = await response.json();
+                alert('json :' + json);
+            } else {
+                console.log(response);
+            }
+        }*/
+
+
+    render() {
+        console.log(this.state)
+        return (
+            <Form
+                className="loginForm"
+                type = {this.state.type}
+                handleSwitchForm={this.handleSwitchForm}
+                login = {this.state.login}
+                password = {this.state.pswrd}
+                passwordCheck ={this.state.pswrdCheck}
+                handleLogin={this.handleLogin}
+                handlePasswordInput={this.handlePasswordInput}
+                handleLoginInput={this.handleLoginInput}
+                handlePasswordCheckInput={this.handlePasswordCheckInput}
+            />
+        )
+    }
+}
+
+ReactDOM.render(
+    <MainPage />,
+    document.getElementById('app')
+)
+
+</script>
+<div id="app">
+
+</div>
+</body>
+</html>
